@@ -599,6 +599,60 @@ namespace NetBlameCustomDataSource.DNSClient
 
 
 		/*
+			The Chromium DNS provider has been parsed from JSON to provide these values:
+				domain1   // "star-mini.c1q0r.facebook.com"
+				domain2   // "www.facebook.com" or null
+				rgAddress // never null, no missing or white-space elements, no port numbers
+		*/
+		public void AddServerAndAddress(string domain1, string domain2, string[] rgAddress)
+		{
+			string strServerName;
+			string strCanonical;
+
+			if (domain2 != null)
+			{
+				strServerName = domain2; // "www.facebook.com"
+				strCanonical = domain1;  // "star-mini.c1q0r.facebook.com"
+			}
+			else
+			{
+				strServerName = domain1; // "star-mini.c1q0r.facebook.com"
+				strCanonical = null;
+			}
+
+			uint iDNS = 0;
+
+			foreach (string strAddr in rgAddress)
+			{
+				if (TryParseEx(strAddr, out IPAddress ipAddress))
+				{
+					uint iAddr = this.AddDNSEntry(strServerName, ipAddress, ref iDNS);
+					AssertImportant(iAddr > 0); // 1-based
+				}
+				else
+				{
+					// All of these address strings should be parseable!
+					AssertImportant(false);
+				}
+			}
+
+			if (iDNS != 0 && strCanonical != null)
+			{
+				DNSClient.DNSEntry dnsEntry = this.DNSEntryFromI(iDNS);
+				if (dnsEntry.strNameAlt == null)
+				{
+					AssertImportant(!String.Equals(dnsEntry.strServer, strCanonical, StringComparison.OrdinalIgnoreCase));
+					dnsEntry.strNameAlt = strCanonical;
+				}
+				else
+				{
+					AssertInfo(String.Equals(dnsEntry.strNameAlt, strCanonical, StringComparison.OrdinalIgnoreCase));
+				}
+			}
+		} // AddServerAndAddress
+
+
+		/*
 			Parse the given Address/Port string, and return the 1-based iDNS, 1-based iAddr, and Port.
 		*/
 		public uint ParseAddressPortString(string strAddress, out uint iAddrOut, out uint portOut)

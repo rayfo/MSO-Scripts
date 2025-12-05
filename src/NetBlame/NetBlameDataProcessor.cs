@@ -31,6 +31,7 @@ using NetBlameCustomDataSource.WinINet;
 using NetBlameCustomDataSource.WinsockAFD;
 using NetBlameCustomDataSource.WinsockNameRes;
 using NetBlameCustomDataSource.WThreadPool;
+using NetBlameCustomDataSource.Chromium;
 
 using static NetBlameCustomDataSource.Util;
 
@@ -381,7 +382,14 @@ namespace NetBlameCustomDataSource
 			DNSTable.guid,              // Microsoft-Windows-DNS-Client
 			WinINetTable.guid,          // Microsoft-Windows-WinINet
 			WinHttpTable.guid,          // Microsoft-Windows-WinHttp
-			WebIOTable.guid             // Microsoft-Windows-WebIO
+			WebIOTable.guid,            // Microsoft-Windows-WebIO
+			// For the browser's DNS records:
+			Chromium.DNSInfo.rgGuid[0], // Microsoft.MSEdgeStable
+			Chromium.DNSInfo.rgGuid[1], // Microsoft.MSEdgeBeta
+			Chromium.DNSInfo.rgGuid[2], // Microsoft.MSEdgeWebView2
+			Chromium.DNSInfo.rgGuid[3], // Microsoft.MSEdgeCanary
+			Chromium.DNSInfo.rgGuid[4], // Microsoft.MSEdgeDev
+			Chromium.DNSInfo.rgGuid[5]  // CHROME
 		};
 
 		// These providers will get processed in the ClassicEventConsumer callback.
@@ -618,6 +626,10 @@ namespace NetBlameCustomDataSource
 
 					// Lower frequency event for polling.
 					if (cancellationToken.IsCancellationRequested) return null;
+				}
+				else if (Array.IndexOf(Chromium.DNSInfo.rgGuid, evtGeneric.ProviderId) >= 0)
+				{
+					Chromium.DNSInfo.Dispatch(evtGeneric, allTables.dnsTable);
 				}
 			} // foreach evtGeneric
 

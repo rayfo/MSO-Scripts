@@ -113,6 +113,7 @@
           <Keywords>
             <Keyword Value="0x0000000000000001" /> <!-- benchmark -->
             <Keyword Value="0x0000000000000002" /> <!-- Blink -->
+            <Keyword Value="0x0000000000000080" /> <!-- netlog & DNS -->
             <Keyword Value="0x0000000000000400" /> <!-- v8 -->
             <Keyword Value="0x0000000000004000" /> <!-- startup -->
             <Keyword Value="0x0000000000008000" /> <!-- latency -->
@@ -128,6 +129,7 @@
             <EventName Value="DocumentLoader::CommitData" />
             <EventName Value="DocumentLoader::HandleData" />
             <EventName Value="FindRunningChromeWindow" />
+            <EventName Value="HOST_RESOLVER_DNS_TASK_EXTRACTION_RESULTS" />
             <EventName Value="HttpRefreshScheduler::NavigateTask" />
             <EventName Value="Jank" />
             <EventName Value="JankyInterval" /> <!-- ? -->
@@ -198,6 +200,7 @@
           <Keywords>
             <Keyword Value="0x0000000000000001" /> <!-- benchmark -->
             <Keyword Value="0x0000000000000002" /> <!-- Blink -->
+            <Keyword Value="0x0000000000000080" /> <!-- netlog & DNS -->
             <Keyword Value="0x0000000000000400" /> <!-- v8 -->
             <Keyword Value="0x0000000000004000" /> <!-- startup -->
             <Keyword Value="0x0000000000008000" /> <!-- latency -->
@@ -211,6 +214,7 @@
             <EventName Value="DocumentLoader::CommitData" />
             <EventName Value="DocumentLoader::HandleData" />
             <EventName Value="FindRunningChromeWindow" />
+            <EventName Value="HOST_RESOLVER_DNS_TASK_EXTRACTION_RESULTS" />
             <EventName Value="HttpRefreshScheduler::NavigateTask" />
             <EventName Value="Jank" />
             <EventName Value="JankyInterval" /> <!-- ? -->
