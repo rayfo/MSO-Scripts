@@ -116,6 +116,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 
 		public bool FClosed => !this.timeClose.HasMaxValue();
 
+		public Protocol Protocol => Prominent((Protocol)this.grbitType);
 
 		public Connection(AddrVal qwEndpoint, IDVal pid, IDVal tid, in TimestampETW timeStamp)
 		{
@@ -188,8 +189,8 @@ namespace NetBlameCustomDataSource.WinsockAFD
 
 
 		// This list/table can shrink (CloseConnection). Do not hold indices.
-		public Connection CxnFromI(uint iCxn) => null;
-		public uint IFromCxn(Connection cxn) => 0;
+		public static Connection CxnFromI(uint iCxn) => null;
+		public static uint IFromCxn(Connection cxn) => 0;
 
 
 		/*
@@ -398,7 +399,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 			{
 				cxn = this.FindLast(c =>
 					c.tidConnect == tid &&
-					c.socket == tcbR.socket &&
+					(c.socket == 0 || c.socket == tcbR.socket) &&
 					(c.addrRemote.Empty() || c.addrRemote.Equals(tcbR.addrRemote))
 				);
 			}
@@ -585,7 +586,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 			Nested AFD events can double-count.
 			Empirically filter out the double-counters according to their location code.
 		*/
-		bool FKnownDoubleCountEvent(uint location)
+		static bool FKnownDoubleCountEvent(uint location)
 		{
 			switch (location)
 			{
@@ -668,7 +669,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 			/*Exit*/  7022,
 
 			// AfdSend
-			/*Enter*/ 3003, 3047, 3058, 3100,
+			/*Enter*/ 3003, 3047, 3057, 3058, 3100,
 			/*Exit*/  3014, 3051, 3201,
 
 			// AfdSendMessageWithAddress
@@ -676,7 +677,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 			/*Exit*/  3200, 3045,
 
 			// AfdReceive
-			/*Enter*/ 4106, 4115, 4117, 4200,
+			/*Enter*/ 4001, 4106, 4115, 4117, 4200,
 			/*Exit*/  4109, 4110, 4111, 4116, 4118, 4122,
 
 			// AfdReceiveMessageWithAddress
@@ -1038,7 +1039,7 @@ namespace NetBlameCustomDataSource.WinsockAFD
 					ushort socket = cxn?.socket ?? 0;
 #if DEBUG
 					pid = GetProcessId(hProc, evt);
-					AssertImportant(cxn?.pid == pid);
+					AssertImportant(FImplies(cxn != null, cxn?.pid == pid));
 
 					SocketAddress addrLocal = cxn?.addrLocal;
 #endif // DEBUG
@@ -1251,6 +1252,10 @@ namespace NetBlameCustomDataSource.WinsockAFD
 
 				// CorrelateUDPRecvEvent has side effects to clear caches for found records.
 				uint iTCB = allTables.tcpTable.CorrelateUDPRecvEvent(pid, tid, cb, cxn.socket, ipAddr);
+
+				// Try again, same process, different/async thread.
+				if (iTCB == 0 && tid != tidUnknown)
+					iTCB = allTables.tcpTable.CorrelateUDPRecvEvent(pid, tidUnknown, cb, cxn.socket, ipAddr);
 
 				if (cxn.iTCB == 0)
 				{

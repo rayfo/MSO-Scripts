@@ -219,13 +219,13 @@ namespace NetBlameCustomDataSource.DNSClient
 			return strDNSName;
 		}
 
-		string DNSNameAndAlt(IPAddress ipAddr, ref string strDNSAlt)
+		public string DNSNameAndAlt(IPAddress ipAddr, ref string strDNSAlt)
 		{
 			uint iDNS = IFindDNSEntryByIPAddress0(ipAddr, out int iAddr);
 			return DNSNameAndAlt(iDNS, ref strDNSAlt, iAddr /*0-based*/);
 		}
 
-		string GetServerNameAndAlt(string strURL /*opt*/, string strServer /*opt*/, string strServer2 /*opt*/, string strServer3 /*opt*/, ref string strServerAlt)
+		static string GetServerNameAndAlt(string strURL /*opt*/, string strServer /*opt*/, string strServer2 /*opt*/, string strServer3 /*opt*/, ref string strServerAlt)
 		{
 			AssertImportant(strServer != null); // Should be at least String.Empty or strNA
 
@@ -251,8 +251,8 @@ namespace NetBlameCustomDataSource.DNSClient
 			if (strServer3 != null)
 				strServerAlt = strServer3;
 
-			AssertInfo(!strServer.IsNA());
-			AssertInfo(!strServerAlt.IsNA());
+			if (strServerAlt.IsNA())
+				strServerAlt = string.Empty;
 
 			if (string.IsNullOrEmpty(strServer))
 				strServer = Util.strNA;
